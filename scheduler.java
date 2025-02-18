@@ -118,11 +118,4 @@ public static void CPU(process[] processes, int SwitchTime){
 }
 
 
-public static int averageTurnaroundTime(process[] processes) {
-
-  return 0;
-
-
-}
-
 }//endclass
