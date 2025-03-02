@@ -1,10 +1,10 @@
 import java.util.*;
 
-public class scheduler{
+public class CPU_Scheduler{
 
-
-  static int Etime =0;
-  static int totalContextSwitch=0;
+static int Etime =0;
+static int totalContextSwitch=0;
+static int totalTurnaround = 0, totalWaiting = 0;
 public static void main(String[]aa){
 Scanner input = new Scanner(System.in);
  
@@ -19,8 +19,7 @@ Scanner input = new Scanner(System.in);
  }
  System.out.println(")");
 
- process processes[] = new process[size];
- //PriorityQueue<event> eventQueue = new PriorityQueue<>();
+ Process processes[] = new Process[size];
 
  System.out.println("Arrival times and burst times in (ms) as follows:");
   System.out.println("-------------------------------------------------");
@@ -31,8 +30,7 @@ Scanner input = new Scanner(System.in);
   int Arrival = input.nextInt();
   System.out.print("Burst time = ");
   int Burst = input.nextInt();
-  processes[i] = new process(i+1, Arrival, Burst); //add to the array 
-  //eventQueue.add(new event(Arrival, "arrival", processes[i])); //add to the queue 
+  processes[i] = new Process(i+1, Arrival, Burst); //add to the array 
  }//endFor
  System.out.println("-------------------------------------------------");
  
@@ -42,7 +40,7 @@ Scanner input = new Scanner(System.in);
   System.out.println("-------------------------------------------------");
  
  System.out.println("Time      Process/CS");
- CPU(processes, SwitchTime);
+ Scheduler(processes, SwitchTime);
  System.out.println("-------------------------------------------------");
  System.out.println("Performance Metrics");
 
@@ -52,48 +50,54 @@ Scanner input = new Scanner(System.in);
  totalWaiting += processes[i].waitingTime;
  }
 
- System.out.printf("Average Turnaround Time: %.2f ms\n", (double) totalTurnaround / processes.length);
-System.out.printf("Average Waiting Time: %.2f ms\n", (double) totalWaiting / processes.length);
-System.out.printf("CPU Utilization: %.2f%%\n", ((double) (Etime - (size*SwitchTime)) / Etime) * 100);
+ System.out.printf("Average Turnaround Time: %.0f\n", (double) totalTurnaround / processes.length);
+System.out.printf("Average Waiting Time: %.1f\n", (double) totalWaiting / processes.length);
+System.out.printf("CPU Utilization: %.2f\n", ((double) (Etime - (size*SwitchTime)) / Etime) * 100);
  
 
 }//end the main
 
-public static void CPU(process[] processes, int SwitchTime){
-  int totalTurnaround = 0, totalWaiting = 0;
+public static void Scheduler(Process[] processes, int SwitchTime){
   int Stime=0;
-  //int Etime=0;
   int completed=0;
-  process current = processes[0];
+  Process current = processes[0];
+  Stime = processes[0].arrivalTime;
+  current.setStatus("running");
   
   while(completed != processes.length ) {
       current.remainingTime--;
       Etime++;
   
       for(int i=0; i<processes.length; i++)
-        if(!processes[i].isComplete() && Etime==processes[i].arrivalTime)
+        if(!processes[i].status.equals("terminated") && Etime==processes[i].arrivalTime)
           if(current.remainingTime > processes[i].remainingTime) {
             System.out.println(Stime + "-" + Etime + "       P" + current.ID);
-            current = processes[i];
+            current.setStatus("ready");
+            current = processes[i]; //switch
+            current.setStatus("running");
             Stime = Etime ;
             Etime += SwitchTime;
             System.out.println(Stime + "-" + Etime + "       CS");
-            totalContextSwitch+= SwitchTime;
+            totalContextSwitch += SwitchTime;
             Stime = Etime;
             break;
             } 
         
         if (current.remainingTime == 0) {
           completed++;
+          current.setStatus("terminated");
           System.out.println(Stime + "-" + Etime + "       P" + current.ID);
           current.completionTime = Etime;
           current.turnaroundTime = current.completionTime - current.arrivalTime;
           current.waitingTime = current.turnaroundTime - current.burstTime;
           totalTurnaround += current.turnaroundTime;
           totalWaiting += current.waitingTime;
+
           if(completed != processes.length)
-            current = processes[min(processes,Etime)];
+            current = processes[SwitchToMin(processes,Etime)];
+          current.setStatus("terminated");
           Stime = Etime;
+
           if(completed != processes.length) {
             Etime += SwitchTime;
             System.out.println(Stime + "-" + Etime + "       CS");
@@ -104,10 +108,10 @@ public static void CPU(process[] processes, int SwitchTime){
     }
   }
   
-  public static int min(process[] processes, int time) { //return the index for the smallest burst time
+  public static int SwitchToMin(Process[] processes, int time) { //return the index for the smallest burst time
   int min = -1;
   for(int i=0; i<processes.length; i++) {
-    if(processes[i].remainingTime != 0 && time >= processes[i].arrivalTime)
+    if(!processes[i].status.equals("terminated") && time >= processes[i].arrivalTime)
       if(min== -1 || processes[i].remainingTime < processes[min].remainingTime)
         min = i;
         else if(processes[i].remainingTime == processes[min].remainingTime)

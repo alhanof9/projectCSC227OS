@@ -1,22 +1,23 @@
-public class process{
+public class Process{
 
     int ID, arrivalTime, burstTime, remainingTime, completionTime, turnaroundTime, waitingTime;
-    
+    String status;
+    // new -> when initiate the object
+    // ready -> when burst time coming
+    // running -> when the procces is proccessing
+    // terminated -> when the procces finish
    
-    public process(int id, int arrivalTime,int burstTime){
+    public Process(int id, int arrivalTime, int burstTime){
     this.ID=id;
     this.arrivalTime=arrivalTime;
     this.burstTime=burstTime;
     this.remainingTime = burstTime;
+    this.status = "new";
     }
    
-    public boolean isComplete(){
-    if(remainingTime==0)
-    return true;
-
-    return false;
+    public void setStatus(String s){
+    status = s;
     }
-    
    
    
    
