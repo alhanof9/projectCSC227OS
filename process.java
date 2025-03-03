@@ -1,3 +1,4 @@
+
 public class Process{
 
     int ID, arrivalTime, burstTime, remainingTime, completionTime, turnaroundTime, waitingTime;
@@ -14,14 +15,10 @@ public class Process{
     this.remainingTime = burstTime;
     this.status = "new";
     }
-   
+
+    // change the status of the process
     public void setStatus(String s){
-    status = s;
+        status = s;
     }
-   
-   
-   
-   
-   
    
    }
